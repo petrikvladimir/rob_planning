@@ -13,8 +13,8 @@ from shapely.geometry import MultiPolygon, Point, LineString
 
 
 class Robot2D:
-    def __init__(self) -> None:
-        self.link_lengths = np.array([0.75, 0.5])
+    def __init__(self, link_lengths=None) -> None:
+        self.link_lengths = np.array([0.75, 0.5]) if link_lengths is None else link_lengths
 
         self.obstacles = MultiPolygon([
             Point((1.0, 1.0)).buffer(0.3, cap_style=3)
@@ -44,15 +44,21 @@ class Robot2D:
     def plt_points_to_line(p1, p2):
         return (p1[0], p2[0]), (p1[1], p2[1])
 
+    def plot_robot(self, q, ax, color):
+        points = self.fk_points(q)
+        joints = [ax.plot(*p, 'o', ms=5, color=color)[0] for p in points]
+        links = [
+            ax.plot(*self.plt_points_to_line(p1, p2), '-', color=color)[0] for p1, p2 in zip(points[:-1], points[1:])
+        ]
+        return joints, links
+
     def animate(self, path, fps=1):
         plt.ion()
         fig, (ax1, ax2) = plt.subplots(1, 2, squeeze=True,
                                        figsize=(6.4 * 2, 4.8))  # type: plt.Figure, (plt.Axes, plt.Axes)
-        points = self.fk_points(path[0])
-        joints = [ax1.plot(*p, 'o', ms=5, color='black')[0] for p in points]
-        links = [
-            ax1.plot(*self.plt_points_to_line(p1, p2), '-', color='black')[0] for p1, p2 in zip(points[:-1], points[1:])
-        ]
+        joints, links = self.plot_robot(path[0], ax1, 'black')
+        self.plot_robot(path[0], ax1, 'tab:green')
+        self.plot_robot(path[-1], ax1, 'tab:red')
         d = sum(self.link_lengths) * 1.2
         ax1.set_xlim(-d, d)
         ax1.set_ylim(-d, d)
@@ -60,7 +66,7 @@ class Robot2D:
         for p in list(self.obstacles):
             ax1.fill(*p.exterior.xy, color='tab:grey')
 
-        config, = ax2.plot(*path[0], 'o', ms=5, color='black')
+        config, = ax2.plot(*path[0][:2], 'o', ms=5, color='black')
         d = np.pi
         ax2.set_xlim(-d, d)
         ax2.set_ylim(-d, d)
@@ -75,7 +81,7 @@ class Robot2D:
                 j.set_data(*p)
             for l, (p1, p2) in zip(links, zip(points[:-1], points[1:])):
                 l.set_data(*self.plt_points_to_line(p1, p2))
-            config.set_data(*q)
+            config.set_data(*q[:2])
             fig.canvas.draw()
             plt.pause(1 / fps)
 

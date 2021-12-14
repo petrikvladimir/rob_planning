@@ -10,7 +10,8 @@ import numpy as np
 
 
 class RRT:
-    def __init__(self, collision_fn, sample_fn, delta_q=0.2) -> None:
+    def __init__(self, collision_fn, sample_fn, delta_q=0.2, path_fn=None) -> None:
+        self.path_fn = path_fn
         self.collision_fn = collision_fn
         self.sample_fn = sample_fn
         self.delta_q = delta_q
@@ -24,8 +25,8 @@ class RRT:
             direction = (q_rand - n_tree.q)
             direction = direction / np.linalg.norm(direction)
             q_new = n_tree.q + self.delta_q * direction
-            if not self.collision_fn(q_new):
+            if not self.collision_fn(q_new) and (self.path_fn is None or self.path_fn(n_tree.q, q_new)):
                 nodes.append(AnyNode(q=q_new, parent=n_tree))
             if np.linalg.norm(q_new - q1) < self.delta_q:
                 goal = AnyNode(q=q1, parent=nodes[-1])
-                return [n.q for n in Walker().walk(root, goal)[2]]
+                return [q0] + [n.q for n in Walker().walk(root, goal)[2]]
