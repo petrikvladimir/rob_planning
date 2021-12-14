@@ -9,12 +9,16 @@ from typing import List
 
 import numpy as np
 import matplotlib.pyplot as plt
-from shapely.geometry import MultiPolygon, Point
+from shapely.geometry import MultiPolygon, Point, LineString
 
 
 class Robot2D:
     def __init__(self) -> None:
         self.link_lengths = np.array([0.75, 0.5])
+
+        self.obstacles = MultiPolygon([
+            Point((1.0, 1.0)).buffer(0.3, cap_style=3)
+        ])
 
     """ Animation function creation - start """
 
@@ -53,6 +57,9 @@ class Robot2D:
         ax1.set_xlim(-d, d)
         ax1.set_ylim(-d, d)
 
+        for p in list(self.obstacles):
+            ax1.fill(*p.exterior.xy, color='tab:grey')
+
         config, = ax2.plot(*path[0], 'o', ms=5, color='black')
         d = np.pi
         ax2.set_xlim(-d, d)
@@ -60,6 +67,9 @@ class Robot2D:
 
         plt.show()
         for q in path:
+            if self.in_collision(q):
+                for v in links + joints + [config]:
+                    v.set_color('tab:red')
             points = self.fk_points(q)
             for j, p in zip(joints, points):
                 j.set_data(*p)
@@ -81,3 +91,6 @@ class Robot2D:
         normalized_d = (b - a) / max_d
         return [a + v * normalized_d for v in np.arange(0., max_d, step_size)] + [b]
 
+    def in_collision(self, q):
+        ls = LineString(self.fk_points(q))
+        return ls.intersects(self.obstacles)

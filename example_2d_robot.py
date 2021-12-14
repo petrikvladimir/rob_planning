@@ -13,4 +13,4 @@ robot = Robot2D()
 # robot.animate([[0, 0]])
 # robot.animate([[0, 0], [1, 1]])
 
-robot.animate(robot.interpolate([0, 0], [1, 1]))
+robot.animate(robot.interpolate([0, 0], [1, 1]), fps=3)
