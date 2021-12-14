@@ -27,6 +27,6 @@ class RRT:
             q_new = n_tree.q + self.delta_q * direction
             if not self.collision_fn(q_new) and (self.path_fn is None or self.path_fn(n_tree.q, q_new)):
                 nodes.append(AnyNode(q=q_new, parent=n_tree))
-            if np.linalg.norm(q_new - q1) < self.delta_q:
+            if np.linalg.norm(q_new - q1) < self.delta_q and (self.path_fn is None or self.path_fn(q_new, q1)):
                 goal = AnyNode(q=q1, parent=nodes[-1])
                 return [q0] + [n.q for n in Walker().walk(root, goal)[2]]
