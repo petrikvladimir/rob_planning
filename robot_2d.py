@@ -4,8 +4,6 @@
 # Created on: 2021-12-13
 #     Author: Vladimir Petrik <vladimir.petrik@cvut.cz>
 #
-import time
-from typing import List
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,12 +13,9 @@ from shapely.geometry import MultiPolygon, Point, LineString
 class Robot2D:
     def __init__(self, link_lengths=None) -> None:
         self.link_lengths = np.array([0.75, 0.5]) if link_lengths is None else link_lengths
-
         self.obstacles = MultiPolygon([
             Point((1.0, 1.0)).buffer(0.3, cap_style=3)
         ])
-
-    """ Animation function creation - start """
 
     @staticmethod
     def transformation2d(theta=0, x=0, y=0):
@@ -62,14 +57,19 @@ class Robot2D:
         d = sum(self.link_lengths) * 1.2
         ax1.set_xlim(-d, d)
         ax1.set_ylim(-d, d)
+        ax1.axis(False)
 
         for p in list(self.obstacles):
             ax1.fill(*p.exterior.xy, color='tab:grey')
 
-        config, = ax2.plot(*path[0][:2], 'o', ms=5, color='black')
+        config, = ax2.plot(*path[0][:2], 'o', ms=5, color='black', label='Current configuration')
         d = np.pi
         ax2.set_xlim(-d, d)
         ax2.set_ylim(-d, d)
+        ax2.set_xlabel('q_1 [rad]')
+        ax2.set_ylabel('q_2 [rad]')
+        ax2.plot(*np.array(path)[:, :2].T, '-', color='tab:grey', label='Planned path')
+        ax2.legend()
 
         plt.show()
         for q in path:
@@ -98,5 +98,7 @@ class Robot2D:
         return [a + v * normalized_d for v in np.arange(0., max_d, step_size)] + [b]
 
     def in_collision(self, q):
+        if not hasattr(self, 'obstacles'):
+            return False
         ls = LineString(self.fk_points(q))
         return ls.intersects(self.obstacles)
