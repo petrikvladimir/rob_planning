@@ -3,7 +3,7 @@
 - 3D robot using pyphysx library
 - basic RRT planner implementation
 
-[![2D Robot example]({fig/2d_robot_example_frame.png})]({video/2d_robot_example.mp4} "2D Robot Example")
+[![2D Robot example](fig/2d_robot_example_frame.png)](video/2d_robot_example.mp4)
 
 # Installation
 First create basic conda environment. Then install:
