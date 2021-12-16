@@ -3,14 +3,14 @@
 - 3D robot using pyphysx library
 - basic RRT planner implementation
 
-[![2D Robot example](fig/2d_robot_example_frame.png)](video/2d_robot_example.mp4)
+![](video/2d_robot_example.gif)
 
 # Installation
 First create basic conda environment. Then install:
 
 
 For basic 2D robot:
-```bash
+```bashhttps://github.com/asyraffff/readme-with-video/blob/main/README.md
 conda install numpy matplotlib shapely
 pip install anytree tqdm 
 ```
